@@ -3,6 +3,7 @@ import scrapy
 
 
 class TestSpider(scrapy.Spider):
+    '''used to debug http header'''
     name = "test"
     allowed_domains = ["localhost"]
     start_urls = (

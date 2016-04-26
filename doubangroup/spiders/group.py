@@ -7,20 +7,26 @@ from doubangroup.items import TopicItem
 
 
 class GroupSpider(scrapy.Spider):
+    '''
+    usage:
+        scrapy crawl group -a group_id=467799 -a date_prefix=04-26
+    see result:
+        curl http://mycloud:6800/listjobs.json?project=doubangroup
+    '''
     name = "group"
     allowed_domains = ["www.douban.com"]
 
     TOPIC_SIZE_PER_PAGE = 25
-    DATA_PREFIX = '04-'  # from April this year
-    GROUP_ID = '467799'
     DOUBAN_GROUP_URL_TEMPLATE = 'https://www.douban.com/group/%s/discussion?start=%s'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, date_prefix, group_id, *args, **kwargs):
         super(GroupSpider, self).__init__(*args, **kwargs)
         self.curr = 0
+        self.date_prefix = date_prefix
+        self.group_id = group_id
 
     def gen_url(self):
-        return self.DOUBAN_GROUP_URL_TEMPLATE % (self.GROUP_ID, self.curr)
+        return self.DOUBAN_GROUP_URL_TEMPLATE % (self.group_id, self.curr)
 
     def start_requests(self):
         return [scrapy.FormRequest(self.gen_url())]
@@ -29,7 +35,7 @@ class GroupSpider(scrapy.Spider):
         contain_present_topic = False
         for tr in response.xpath("//table[@class='olt']//tr[@class='']"):
             pub_time = tr.xpath('./td[4]/text()').extract()[0]
-            if pub_time.startswith(self.DATA_PREFIX):
+            if pub_time.startswith(self.date_prefix):
                 contain_present_topic = True
             else:
                 continue                

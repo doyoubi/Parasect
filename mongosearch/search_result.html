@@ -1,0 +1,16 @@
+<!DOCTYPE>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <h1><a href="/">index</a></h1>
+    <div>
+        {% for topic in topic_list %}
+        <div>
+            <span>{{ loop.index }}</span><a href="{{ topic.link }}">{{ topic.title }}</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

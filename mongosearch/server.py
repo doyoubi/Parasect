@@ -14,10 +14,10 @@ def index():
     return render_template('index.html')
 
 
-@app.route("/search", methods=['POST'])
+@app.route("/search")
 def search():
-    include = request.form.get('include')
-    exclude = request.form.get('exclude')
+    include = request.args.get('include')
+    exclude = request.args.get('exclude')
     if None in (include, exclude):
         return "include or exclude is empty"
     include = include.strip()

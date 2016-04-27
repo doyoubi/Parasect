@@ -20,22 +20,30 @@ def search():
     exclude = request.args.get('exclude')
     if None in (include, exclude):
         return "include or exclude is empty"
-    include = include.strip()
-    exclude = exclude.strip()
+    include = str2list(include)
+    exclude = str2list(exclude)
+    include_cond = [re.compile(s) for s in include]
+    exclude_cond = [{'title' : {'$not' : re.compile("^.*%s.*" % s)}} for s in exclude]
 
     i, e = len(include) != 0, len(exclude) != 0
     if not (i or e):
         data = mongo.db.group_topics.find()
     elif i and not e:
-        data = mongo.db.group_topics.find({'title': {'$regex': include}})
+        data = mongo.db.group_topics.find({'title': {'$all': include_cond}})
     elif not i and e:
-        data = mongo.db.group_topics.find({'title': {'$not': re.compile("^.*%s.*" % exclude)}})
+        data = mongo.db.group_topics.find({'$and': exclude_cond})
     else:
-        data = mongo.db.group_topics.find({'title': {
-                '$regex': include,
-                '$not': re.compile("^.*%s.*" % exclude),
-            }})
+        data = mongo.db.group_topics.find({'$and': [
+                {'title': {'$all': include_cond}},
+                {'$and': exclude_cond}
+            ]})
     return render_template('search_result.html', topic_list=data)
+
+
+def str2list(s):
+    s = set(s.strip().split(' '))
+    s.discard('')
+    return list(s)
 
 
 if __name__ == "__main__":
